@@ -17,7 +17,7 @@ const sequelize = new Sequelize(
       port: process.env.DB_PORT || 5432,
     }),
     dialect: 'postgres',
-    ...(isProduction ? { dialectOptions: { ssl: { require: true, rejectUnauthorized: false } } } : {}),
+    ...(isProduction ? { dialectOptions: { ssl: { rejectUnauthorized: false } } } : {}),
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
       max: 10,
