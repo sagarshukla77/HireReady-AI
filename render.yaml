@@ -33,8 +33,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: hireready-ai-api
-          property: host
-
+        value: https://hireready-ai-api-e1kh.onrender.com/api
