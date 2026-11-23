@@ -18,10 +18,10 @@ ALTER TABLE interviews
   ADD COLUMN IF NOT EXISTS stage VARCHAR(50),
   ADD COLUMN IF NOT EXISTS interview_type VARCHAR(50);
 
--- Backfill scheduled_at from started_at for existing rows
+-- Backfill scheduled_at from start_time for existing rows
 UPDATE interviews
-SET scheduled_at = started_at
-WHERE scheduled_at IS NULL AND started_at IS NOT NULL;
+SET scheduled_at = start_time
+WHERE scheduled_at IS NULL AND start_time IS NOT NULL;
 
 -- Backfill stage for existing rows (default to 'screening')
 UPDATE interviews
