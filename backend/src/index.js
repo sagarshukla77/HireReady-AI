@@ -77,7 +77,17 @@ const PORT = process.env.PORT || 5000;
 // Test database connection and start server
 async function startServer() {
   try {
-    await sequelize.authenticate();
+    let connected = false;
+    for (let attempt = 1; attempt <= 5 && !connected; attempt += 1) {
+      try {
+        await sequelize.authenticate();
+        connected = true;
+      } catch (error) {
+        console.error(`Database connection attempt ${attempt}/5 failed: ${error.message}`);
+        if (attempt === 5) throw error;
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+    }
     console.log('Database connection established successfully.');
 
     // In development, you might want to run migrations automatically here
