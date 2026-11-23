@@ -16,10 +16,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
-        fromService:
-          type: web
-          name: hireready-ai
-          property: host
+        value: https://hireready-ai-e1kh.onrender.com,https://hireready-ai-frontend.onrender.com
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
