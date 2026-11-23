@@ -2,10 +2,12 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const MODEL_NAME = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+const FALLBACK_MODEL_NAME = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.6-flash';
 const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS || 60_000);
 
 let genAI = null;
 let model = null;
+let fallbackModel = null;
 
 /**
  * Initialize Gemini client
@@ -20,6 +22,9 @@ function initializeGemini() {
   if (!genAI) {
     genAI = new GoogleGenerativeAI(apiKey);
     model = genAI.getGenerativeModel({ model: MODEL_NAME });
+    if (FALLBACK_MODEL_NAME && FALLBACK_MODEL_NAME !== MODEL_NAME) {
+      fallbackModel = genAI.getGenerativeModel({ model: FALLBACK_MODEL_NAME });
+    }
     console.info('[AI] Gemini client initialized', { model: MODEL_NAME });
   }
   return true;
@@ -45,7 +50,7 @@ exports.analyzeResume = async (resumeText, options = {}) => {
   const prompt = buildAnalysisPrompt(resumeText, options);
 
   try {
-    const result = await generateWithRetry(
+    const result = await generateWithFallback(
       {
         contents: [
           {
@@ -113,6 +118,10 @@ function withTimeout(promise, timeoutMs, message) {
   return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeout));
 }
 async function generateWithRetry(request, maxRetries = 3) {
+  return generateWithRetryUsingModel(request, model, maxRetries);
+}
+
+async function generateWithRetryUsingModel(request, selectedModel, maxRetries = 3) {
   let lastError;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -122,7 +131,7 @@ async function generateWithRetry(request, maxRetries = 3) {
       );
 
       return await withTimeout(
-        model.generateContent(request),
+        selectedModel.generateContent(request),
         GEMINI_TIMEOUT_MS,
         'Gemini analysis timed out. Please try again.'
       );
@@ -155,6 +164,19 @@ async function generateWithRetry(request, maxRetries = 3) {
   }
 
   throw lastError;
+}
+
+async function generateWithFallback(request, maxRetries = 3) {
+  try {
+    return await generateWithRetry(request, maxRetries);
+  } catch (error) {
+    const message = error?.message || '';
+    const isTemporaryProviderError = /503|UNAVAILABLE|429|RESOURCE_EXHAUSTED|500/.test(message);
+    if (!fallbackModel || !isTemporaryProviderError) throw error;
+
+    console.warn(`[AI] Primary model ${MODEL_NAME} is unavailable; trying ${FALLBACK_MODEL_NAME}.`);
+    return generateWithRetryUsingModel(request, fallbackModel, 1);
+  }
 }
 
 function sleep(ms) {
@@ -363,7 +385,7 @@ exports.generateInterviewQuestions = async (candidateProfile, interviewContext) 
   const prompt = buildQuestionsPrompt(candidateProfile, interviewContext);
 
   try {
-    const result = await model.generateContent({
+    const result = await generateWithFallback({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.3,
@@ -372,7 +394,7 @@ exports.generateInterviewQuestions = async (candidateProfile, interviewContext) 
         maxOutputTokens: 4096,
         responseMimeType: 'application/json',
       },
-    });
+    }, 3);
 
     const response = await result.response;
     const text = response.text();
