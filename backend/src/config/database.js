@@ -2,20 +2,29 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-const useDatabaseUrl = Boolean(process.env.DATABASE_URL);
+const databaseUrl = process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL) : null;
+const useDatabaseUrl = Boolean(databaseUrl);
 const isProduction = process.env.NODE_ENV === 'production';
 
 const sequelize = new Sequelize(
   useDatabaseUrl
-    ? process.env.DATABASE_URL
+    ? decodeURIComponent(databaseUrl.pathname.replace(/^\//, ''))
     : process.env.DB_NAME || 'hireready',
-  useDatabaseUrl ? undefined : process.env.DB_USER || 'postgres',
-  useDatabaseUrl ? undefined : process.env.DB_PASSWORD || 'postgres',
+  useDatabaseUrl
+    ? decodeURIComponent(databaseUrl.username)
+    : process.env.DB_USER || 'postgres',
+  useDatabaseUrl
+    ? decodeURIComponent(databaseUrl.password)
+    : process.env.DB_PASSWORD || 'postgres',
   {
     ...(useDatabaseUrl ? {} : {
       host: process.env.DB_HOST || 'localhost',
       port: process.env.DB_PORT || 5432,
     }),
+    ...(useDatabaseUrl ? {
+      host: databaseUrl.hostname,
+      port: databaseUrl.port ? Number(databaseUrl.port) : 5432,
+    } : {}),
     dialect: 'postgres',
     ...(isProduction ? { dialectOptions: { ssl: { rejectUnauthorized: false } } } : {}),
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
