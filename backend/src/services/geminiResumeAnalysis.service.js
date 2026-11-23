@@ -3,7 +3,8 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const MODEL_NAME = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 const FALLBACK_MODEL_NAME = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.6-flash';
-const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS || 60_000);
+// Keep all model attempts within Render's request window, including failover.
+const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS || 20_000);
 
 let genAI = null;
 let model = null;
@@ -66,7 +67,7 @@ exports.analyzeResume = async (resumeText, options = {}) => {
           responseMimeType: 'application/json',
         },
       },
-      3
+      1
     );
 
     const response = await result.response;
@@ -146,7 +147,8 @@ async function generateWithRetryUsingModel(request, selectedModel, maxRetries = 
         errorMessage.includes('UNAVAILABLE') ||
         errorMessage.includes('429') ||
         errorMessage.includes('RESOURCE_EXHAUSTED') ||
-        errorMessage.includes('500');
+        errorMessage.includes('500') ||
+        errorMessage.includes('timed out');
 
       if (!isRetryable || attempt === maxRetries) {
         throw error;
@@ -171,7 +173,7 @@ async function generateWithFallback(request, maxRetries = 3) {
     return await generateWithRetry(request, maxRetries);
   } catch (error) {
     const message = error?.message || '';
-    const isTemporaryProviderError = /503|UNAVAILABLE|429|RESOURCE_EXHAUSTED|500/.test(message);
+    const isTemporaryProviderError = /503|UNAVAILABLE|429|RESOURCE_EXHAUSTED|500|timed out/i.test(message);
     if (!fallbackModel || !isTemporaryProviderError) throw error;
 
     console.warn(`[AI] Primary model ${MODEL_NAME} is unavailable; trying ${FALLBACK_MODEL_NAME}.`);
