@@ -5,7 +5,7 @@ import Navbar from "../components/ui/Navbar";
 import PageTransition from "../components/ui/PageTransition";
 import GlassCard from "../components/ui/GlassCard";
 
-const BASE = import.meta.env.VITE_API_URL || "/api";
+import { API_BASE_URL as BASE } from "../services/apiBase";
 const statusStyles = {
   scheduled: "text-amber-300 bg-amber-400/10 border-amber-400/20",
   in_progress: "text-cyan-300 bg-cyan-400/10 border-cyan-400/20",

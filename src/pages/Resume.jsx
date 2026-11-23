@@ -7,7 +7,7 @@ import Button from "../components/ui/Button";
 import ResumeUpload from "../components/resume/ResumeUpload";
 import CandidateProfileReview from "../components/resume/CandidateProfileReview";
 
-const BASE = import.meta.env.VITE_API_URL || "/api";
+import { API_BASE_URL as BASE } from "../services/apiBase";
 const PARSE_TIMEOUT_MS = 45_000;
 const ANALYSIS_TIMEOUT_MS = 90_000;
 const STEPS = [

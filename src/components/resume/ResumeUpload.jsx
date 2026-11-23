@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const BASE = import.meta.env.VITE_API_URL || "/api";
+import { API_BASE_URL as BASE } from "../../services/apiBase";
 const MAX_SIZE = 10 * 1024 * 1024;
 
 const Icon = ({ name, size = 22 }) => {

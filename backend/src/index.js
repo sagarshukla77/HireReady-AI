@@ -29,7 +29,10 @@ app.get('/api/health', (req, res) => {
 // CORS setup
 app.use(cors({
   origin: (origin, callback) => {
-    const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',').map(o => o.trim());
+    const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',').map(o => {
+      const value = o.trim();
+      return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    });
     // Vite selects the next available port when 5173 is already in use.
     // Accept loopback origins during development while keeping production
     // restricted to the explicitly configured CLIENT_URL values.

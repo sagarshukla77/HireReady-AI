@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
-const BASE = import.meta.env.VITE_API_URL || "/api";
+import { API_BASE_URL as BASE } from "../../services/apiBase";
 const CATEGORIES = [
   { key: "technical", label: "Technical skills", color: "#22d3ee" },
   { key: "frameworks", label: "Frameworks", color: "#60a5fa" },

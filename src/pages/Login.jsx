@@ -7,7 +7,7 @@ import Button from "../components/ui/Button";
 
 // Use Vite's /api proxy in development to keep browser requests same-origin.
 // Set VITE_API_URL for deployed environments that do not provide a proxy.
-const BASE = import.meta.env.VITE_API_URL || "/api";
+import { API_BASE_URL as BASE } from "../services/apiBase";
 
 const inputCls =
   "w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder-white/30 transition-colors focus:border-accent/60 focus:outline-none";

@@ -1,7 +1,6 @@
 // Speech Service - frontend service for communicating with the speech-to-text backend
 import axios from "axios";
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
+import { API_BASE_URL } from "./apiBase";
 
 class SpeechService {
   /**

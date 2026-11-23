@@ -6,7 +6,7 @@ import GlassCard from "../components/ui/GlassCard";
 import Button from "../components/ui/Button";
 import SpeechRecorder from "../components/Interview/SpeechRecorder";
 
-const BASE = import.meta.env.VITE_API_URL || "/api";
+import { API_BASE_URL as BASE } from "../services/apiBase";
 
 const ScoreBar = ({ label, value }) => {
   const score = Math.min(100, Math.max(0, value ?? 0));

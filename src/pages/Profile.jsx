@@ -5,7 +5,7 @@ import PageTransition from "../components/ui/PageTransition";
 import Navbar from "../components/ui/Navbar";
 import GlassCard from "../components/ui/GlassCard";
 
-const BASE = import.meta.env.VITE_API_URL || "/api";
+import { API_BASE_URL as BASE } from "../services/apiBase";
 const DEFAULTS = {
   full_name: "",
   email: "",

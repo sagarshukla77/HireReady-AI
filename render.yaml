@@ -18,7 +18,10 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
-        value: https://hireready-ai.onrender.com
+        fromService:
+          type: web
+          name: hireready-ai
+          property: host
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
@@ -35,7 +38,10 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://hireready-ai-api.onrender.com/api
+        fromService:
+          type: web
+          name: hireready-ai-api
+          property: host
 
 databases:
   - name: hireready-ai-db
